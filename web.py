@@ -50,6 +50,7 @@ def main():
 	app = App(root)
 	root.after(20,app.GetPrice)
 	root.mainloop()
+#comment
 	
 
 	
