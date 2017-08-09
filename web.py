@@ -43,6 +43,12 @@ class App(Frame):
 		root.after(5000,self.GetPrice)
 
 
+
+
+
+
+
+
 def main():
 	global root
 	root = Tk()
