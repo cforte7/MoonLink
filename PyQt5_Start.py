@@ -11,7 +11,7 @@ from matplotlib.finance import candlestick2_ohlc
 from pathlib import Path
 from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QSizePolicy
 from PyQt5.QtCore import QCoreApplication
-from PyQt5.QtGui import QIcon
+from PyQt5.QtGui import QIcon, QPainter, QColor, QFont
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 from matplotlib.figure import Figure
@@ -19,8 +19,9 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 from matplotlib.finance import candlestick2_ohlc
 import matplotlib.dates as mdates
+from Graph_Gen import Gen
 
-
+#chart = Gen(60)
 
 
 #Main Window Class
@@ -30,15 +31,22 @@ class Example(QWidget):
 		super().__init__() #returns the parent object of the Example Class (Qwidget)
 		self.initUI()
 		
+	
+	def graphEvent(self,event):
+		qp = QPainter()
+		qp.begin(self)
+		self.Gen(60)
+		qp.end()
+
+		
 	def link_click(self):
 		webbrowser.open("https://coinbase.com")
 
 	def initUI(self):      #Actual creation of the window
-		self.setGeometry(500,500,600,600) #(xpos,ypos,xlen,ylen)
+		self.setGeometry(500,500,770,500) #(xpos,ypos,xlen,ylen)
 		self.setWindowTitle('MoonLink')  #Title Bar Text
 		self.setWindowIcon(QIcon('Graphics/MoonIcon.png'))  #Picture used for the icon (ETH image in local folder)
 		
-		m = Graph_Canvas(self, width=5,height=4)
 
 		QuitButton = QPushButton('Quit',self)
 		QuitButton.setToolTip('Close MoonLink')
@@ -48,67 +56,36 @@ class Example(QWidget):
 
 		LinkButton = QPushButton('Coinbase Link',self)
 		LinkButton.setToolTip('Link to Coinbase')
-		LinkButton.move(450,575)
+		LinkButton.move(650,430)
 		LinkButton.clicked.connect(self.link_click)
-			
+		m = PlotCanvas(self,width=5,height=4)
 
-#DataURL = 'https://poloniex.com/public?command=returnChartData&currencyPair=USDT_ETH&start=1435699200&end=9999999999&period=14400'
-#DataText = requests.get(DataURL).text
-
-#Offline Data test module
-with open('ETH_Data.json') as EthJson:
-	d = ''
-	for x in EthJson:
-		d = x
-	EthJson.close()
-	PriceFrame = pd.read_json(str(d))
-
-#Data Functions
-'''
-def DataUpdate():
-	DataURL = 'https://poloniex.com/public?command=returnChartData&currencyPair=USDT_ETH&start=1435699200&end=9999999999&period=14400'
-	DataText = requests.get(DataURL).text
-	PriceFrame = pd.read_json(DataText)
-	#Columns: ['close','date','high','low','open','quoteVolume','volume', 'weightedAverage']
-	'''
-TimeSpan = 30
-
-
-
-
-
-class Graph_Canvas(FigureCanvas):
-	def __init__(self, parent=None, width=5, height=4, dpi=100):
-		fig = Figure(figsize=(width,height),dpi=dpi)
-		self.axes = fig.add_subplot(111)#subplot2grid((6,1),(1,0), rowspan = 10)
-		FigureCanvas.__init__(self,fig)
-		FigureCanvas.setSizePolicy(self,QSizePolicy.Expanding,QSizePolicy.Expanding)
-		FigureCanvas.updateGeometry(self)
-		self.setParent(parent)
-		self.plot()
-
-	def plot(self):
-		for index,row in PriceFrame.iterrows():
-			if str(row['date'].time())[0:2] != '00':
-				PriceFrame.drop(index, inplace=True)
-		Candle_Graph = candlestick2_ohlc(ax =self.axes, opens=PriceFrame.open[len(PriceFrame)-TimeSpan:len(PriceFrame)],
-												      closes=PriceFrame.close[len(PriceFrame)-TimeSpan:len(PriceFrame)],
-										              highs=PriceFrame.high[len(PriceFrame)-TimeSpan:len(PriceFrame)],
-										              lows=PriceFrame.low[len(PriceFrame)-TimeSpan:len(PriceFrame)],
-										              width = .5,
-										              alpha = .75,colorup='#77d879', colordown='#db3f3f')
+class PlotCanvas(FigureCanvas):
+	def __init__(self, parent=None, width=5,height=4,dpi = 100):
+		fig = Gen(365)
 		
+
+		FigureCanvas.__init__(self, fig)
+		self.setParent(parent)
+
+		FigureCanvas.setSizePolicy(self,
+        	QSizePolicy.Expanding,
+        	QSizePolicy.Expanding)
+		FigureCanvas.updateGeometry(self)
+		
+	def DateFormat(x,pos):
+		try:
+			return(pd.to_datetime(dates[int(x)]))
+		except IndexError:
+			return('')
+	
+
 	
 
 
 
 
-
-
-
 if __name__ == '__main__':
-	#DataUpdate()
-
 	app = QApplication(sys.argv)
 	ex = Example()
 	ex.show()
