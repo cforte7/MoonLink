@@ -1,15 +1,11 @@
 import sys
-import requests
+ import requests
 import webbrowser
 import datetime
 import pandas as pd
-import pickle as pk
-import plotly.plotly as py 
-import plotly.graph_objs as go
-import json
 from matplotlib.finance import candlestick2_ohlc
 from pathlib import Path
-from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QSizePolicy
+from PyQt5.QtWidgets import QWidget, QPushButton, QApplication, QSizePolicy, QLineEdit
 from PyQt5.QtCore import QCoreApplication
 from PyQt5.QtGui import QIcon, QPainter, QColor, QFont
 import matplotlib.pyplot as plt
@@ -23,7 +19,7 @@ from Graph_Gen import Gen
 
 #chart = Gen(60)
 
-
+TimeF = 60
 #Main Window Class
 class Example(QWidget):
 
@@ -32,26 +28,32 @@ class Example(QWidget):
 		self.initUI()
 		
 	
-	def graphEvent(self,event):
-		qp = QPainter()
-		qp.begin(self)
-		self.Gen(60)
-		qp.end()
 
 		
 	def link_click(self):
 		webbrowser.open("https://coinbase.com")
+
+	def wrapper(self):
+		Gen(30)
 
 	def initUI(self):      #Actual creation of the window
 		self.setGeometry(500,500,770,500) #(xpos,ypos,xlen,ylen)
 		self.setWindowTitle('MoonLink')  #Title Bar Text
 		self.setWindowIcon(QIcon('Graphics/MoonIcon.png'))  #Picture used for the icon (ETH image in local folder)
 		
+		DateRange = QLineEdit()
+		DateRange.__init__(self)
+		DateRange.setFixedWidth(40)
+		DateRange.move(650,50)
+
+		DateRefresh = QPushButton('Refresh Data',self)
+		DateRefresh.move(650,75)
+		DateRefresh.clicked.connect(self.wrapper)
 
 		QuitButton = QPushButton('Quit',self)
 		QuitButton.setToolTip('Close MoonLink')
 		QuitButton.resize(QuitButton.sizeHint())
-		QuitButton.move(320,575)
+		QuitButton.move(650,460)
 		QuitButton.clicked.connect(QCoreApplication.instance().quit) #Command used when button is clicked, the signal from a mouse click is the 'clicked' 
 
 		LinkButton = QPushButton('Coinbase Link',self)
@@ -62,7 +64,7 @@ class Example(QWidget):
 
 class PlotCanvas(FigureCanvas):
 	def __init__(self, parent=None, width=5,height=4,dpi = 100):
-		fig = Gen(365)
+		fig = Gen(TimeF)
 		
 
 		FigureCanvas.__init__(self, fig)
